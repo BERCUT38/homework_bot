@@ -18,7 +18,7 @@ PRACTICUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_TIME = 300
+RETRY_TIME = 5
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 
 HOMEWORK_STATUSES = {
@@ -38,8 +38,8 @@ def get_api_answer(url, current_timestamp):
     headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     payload = {'from_date': current_timestamp}
     homework_statuses = requests.get(url, headers=headers, params=payload)
-    print('!!!!!!!!!!!!!!!!!', homework_statuses.text)
-    print('@@@@@@@@@@@@@@@', homework_statuses.status_code)
+    if homework_statuses.status_code != 200:
+       raise Exception("invalid response")
     logging.info('server respond')
     return homework_statuses.json()
     
@@ -54,7 +54,16 @@ def parse_status(homework):
 
 def check_response(response):
     hws = response.get('homeworks')
-    return hws
+    if hws:
+        for hw in hws:
+            status = hw.get('status')
+            if status in HOMEWORK_STATUSES.keys():
+                return hws
+            else:
+                raise Exception("no such status")
+    else:    
+        raise Exception("no infomation")
+    
 
 
 def main():
