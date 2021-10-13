@@ -68,6 +68,7 @@ def check_response(response):
 
 
 def main():
+    """Главный цикл работы."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     url = ENDPOINT
