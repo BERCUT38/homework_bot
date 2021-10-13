@@ -18,7 +18,7 @@ PRACTICUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_TIME = 5
+RETRY_TIME = 300
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 
 HOMEWORK_STATUSES = {
@@ -39,10 +39,9 @@ def get_api_answer(url, current_timestamp):
     payload = {'from_date': current_timestamp}
     homework_statuses = requests.get(url, headers=headers, params=payload)
     if homework_statuses.status_code != 200:
-       raise Exception("invalid response")
+        raise Exception("invalid response")
     logging.info('server respond')
     return homework_statuses.json()
-    
 
 
 def parse_status(homework):
@@ -61,14 +60,13 @@ def check_response(response):
                 return hws
             else:
                 raise Exception("no such status")
-    else:    
+    else:
         raise Exception("no infomation")
-    
 
 
 def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = 0  #int(time.time())
+    current_timestamp = int(time.time())
     url = ENDPOINT
     while True:
         try:
