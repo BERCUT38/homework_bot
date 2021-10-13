@@ -29,6 +29,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
+    """Отсылаем сообщение."""
     logging.info(f'message send {message}')
     return bot.send_message(chat_id=CHAT_ID, text=message)
 
@@ -45,6 +46,7 @@ def get_api_answer(url, current_timestamp):
 
 
 def parse_status(homework):
+    """Достаем статус работы."""
     verdict = HOMEWORK_STATUSES[homework.get('status')]
     homework_name = homework.get('homework_name')
     logging.info(f'got verdict {verdict}')
@@ -52,6 +54,7 @@ def parse_status(homework):
 
 
 def check_response(response):
+    """Проверка полученной информации."""
     hws = response.get('homeworks')
     if hws:
         for hw in hws:
