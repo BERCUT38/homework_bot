@@ -61,7 +61,7 @@ def check_response(response):
     # Если ключа домашки нет, то поднимать ошибку.
     if hws:
         # Если домашки это лист и длина соответствующая
-        if(type(hws) == list) and (len(hws) != 0):
+        if (type(hws) == list) and (len(hws) != 0):
             # Проверку статуса в этой функции требуют тесты
             for hw in hws:
                 status = hw.get('status')
