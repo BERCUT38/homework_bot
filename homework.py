@@ -9,7 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     filename='main.log',
     format='%(asctime)s, %(levelname)s, %(name)s, %(message)s',
-    filemode='w'
+    filemode='a'
 )
 
 load_dotenv()
@@ -49,6 +49,8 @@ def parse_status(homework):
     """Достаем статус работы."""
     verdict = HOMEWORK_STATUSES[homework.get('status')]
     homework_name = homework.get('homework_name')
+    if homework_name is None:
+        raise Exception("No homework name")
     logging.info(f'got verdict {verdict}')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -56,13 +58,20 @@ def parse_status(homework):
 def check_response(response):
     """Проверка полученной информации."""
     hws = response.get('homeworks')
+    # Если ключа домашки нет, то поднимать ошибку.
     if hws:
-        for hw in hws:
-            status = hw.get('status')
-            if status in HOMEWORK_STATUSES.keys():
-                return hws
-            else:
-                raise Exception("no such status")
+        # Если домашки это лист и длина соответствующая
+        if(type(hws) == list) and (len(hws) != 0):
+            # Проверку статуса в этой функции требуют тесты
+            for hw in hws:
+                status = hw.get('status')
+                if status in HOMEWORK_STATUSES.keys():
+                    return hws
+                else:
+                    raise Exception("no such status")
+            return hws
+        else:
+            raise Exception("empty")
     else:
         raise Exception("no infomation")
 
@@ -74,12 +83,12 @@ def main():
     url = ENDPOINT
     while True:
         try:
-            gaa = get_api_answer(url, current_timestamp)
-            cr = check_response(gaa)
-            if cr:
-                for hw in cr:
-                    ps = parse_status(hw)
-                    send_message(bot, ps)
+            get_api_answer_result = get_api_answer(url, current_timestamp)
+            check_response_result = check_response(get_api_answer_result)
+            if check_response_result:
+                for homework in check_response_result:
+                    parse_status_result = parse_status(homework)
+                    send_message(bot, parse_status_result)
             time.sleep(RETRY_TIME)
         except Exception as error:
             logging.error('Bot down')
