@@ -51,6 +51,8 @@ def parse_status(homework):
     homework_name = homework.get('homework_name')
     if homework_name is None:
         raise Exception("No homework name")
+    if verdict is None:
+        raise Exception("No verdict")
     logging.info(f'got verdict {verdict}')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -59,21 +61,19 @@ def check_response(response):
     """Проверка полученной информации."""
     hws = response.get('homeworks')
     # Если ключа домашки нет, то поднимать ошибку.
-    if hws:
+    if hws is None:
+        raise Exception("No homeworks")
         # Если домашки это лист и длина соответствующая
-        if (type(hws) == list) and (len(hws) != 0):
-            # Проверку статуса в этой функции требуют тесты
-            for hw in hws:
-                status = hw.get('status')
-                if status in HOMEWORK_STATUSES.keys():
-                    return hws
-                else:
-                    raise Exception("no such status")
+    if (type(hws) != list) and (len(hws) == 0):
+        raise Exception("Wrong type of homework")
+        # Проверку статуса в этой функции требуют тесты
+    for hw in hws:
+        status = hw.get('status')
+        if status in HOMEWORK_STATUSES.keys():
             return hws
         else:
-            raise Exception("empty")
-    else:
-        raise Exception("no infomation")
+            raise Exception("no such status")
+    return hws
 
 
 def main():
